@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Traffic Intelligence Platform</title>
+  <meta name="description"
+    content="Smart Traffic Routing System using Dijkstra's Algorithm with real-time traffic simulation and graph visualization." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <!-- Background particles -->
+  <div class="bg-grid"></div>
+  <div class="particles" id="particles"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="14" stroke="url(#logoGrad)" stroke-width="2" />
+            <circle cx="8" cy="10" r="3" fill="url(#logoGrad)" />
+            <circle cx="24" cy="10" r="3" fill="url(#logoGrad)" />
+            <circle cx="8" cy="22" r="3" fill="url(#logoGrad)" />
+            <circle cx="24" cy="22" r="3" fill="url(#logoGrad)" />
+            <circle cx="16" cy="16" r="3" fill="url(#logoGrad2)" />
+            <line x1="8" y1="10" x2="24" y2="10" stroke="rgba(99,179,237,0.5)" stroke-width="1.5" />
+            <line x1="8" y1="22" x2="24" y2="22" stroke="rgba(99,179,237,0.5)" stroke-width="1.5" />
+            <line x1="8" y1="10" x2="8" y2="22" stroke="rgba(99,179,237,0.5)" stroke-width="1.5" />
+            <line x1="24" y1="10" x2="24" y2="22" stroke="rgba(99,179,237,0.5)" stroke-width="1.5" />
+            <line x1="8" y1="10" x2="16" y2="16" stroke="rgba(99,179,237,0.5)" stroke-width="1.5" />
+            <line x1="24" y1="10" x2="16" y2="16" stroke="rgba(99,179,237,0.5)" stroke-width="1.5" />
+            <line x1="8" y1="22" x2="16" y2="16" stroke="rgba(99,179,237,0.5)" stroke-width="1.5" />
+            <line x1="24" y1="22" x2="16" y2="16" stroke="rgba(99,179,237,0.5)" stroke-width="1.5" />
+            <defs>
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#63b3ed" />
+                <stop offset="1" stop-color="#b794f4" />
+              </linearGradient>
+              <linearGradient id="logoGrad2" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#f6ad55" />
+                <stop offset="1" stop-color="#fc8181" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-title">TrafficIQ</span>
+          <span class="logo-sub">Intelligence Platform</span>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge badge-algo">Dijkstra's Algorithm</span>
+        <span class="badge badge-ds">Graph · Priority Queue</span>
+        <div class="status-dot"></div>
+        <span class="status-text">Live Simulation</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main layout -->
+  <main class="main-layout">
+
+    <!-- Left Panel: Controls -->
+    <aside class="panel control-panel">
+      <div class="panel-header">
+        <h2>🗺️ Route Planner</h2>
+        <p>Select source & destination to find optimal path</p>
+      </div>
+
+      <div class="control-section">
+        <label class="control-label">📍 Source Intersection</label>
+        <select id="sourceSelect" class="select-input">
+          <option value="">— Choose Source —</option>
+        </select>
+      </div>
+
+      <div class="control-section">
+        <label class="control-label">🏁 Destination Intersection</label>
+        <select id="destSelect" class="select-input">
+          <option value="">— Choose Destination —</option>
+        </select>
+      </div>
+
+      <div class="control-section">
+        <label class="control-label">🚦 Traffic Intensity</label>
+        <div class="traffic-buttons" id="trafficButtons">
+          <button class="traffic-btn low active" data-level="low" id="trafficLow">
+            <span class="traffic-icon">🟢</span>
+            <span>Low</span>
+          </button>
+          <button class="traffic-btn medium" data-level="medium" id="trafficMedium">
+            <span class="traffic-icon">🟡</span>
+            <span>Medium</span>
+          </button>
+          <button class="traffic-btn high" data-level="high" id="trafficHigh">
+            <span class="traffic-icon">🔴</span>
+            <span>High</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="control-section">
+        <button class="btn-primary" id="findRouteBtn">
+          <span>⚡ Find Optimal Route</span>
+        </button>
+        <button class="btn-secondary" id="randomTrafficBtn">
+          <span>🎲 Randomize Traffic</span>
+        </button>
+        <button class="btn-ghost" id="resetBtn">
+          <span>↺ Reset</span>
+        </button>
+      </div>
+
+      <!-- Legend -->
+      <div class="legend-section">
+        <div class="legend-title">Legend</div>
+        <div class="legend-item"><span class="legend-dot dot-source"></span> Source Node</div>
+        <div class="legend-item"><span class="legend-dot dot-dest"></span> Destination Node</div>
+        <div class="legend-item"><span class="legend-dot dot-path"></span> Optimal Path</div>
+        <div class="legend-item"><span class="legend-line line-low"></span> Low Traffic</div>
+        <div class="legend-item"><span class="legend-line line-med"></span> Medium Traffic</div>
+        <div class="legend-item"><span class="legend-line line-high"></span> Heavy Traffic</div>
+      </div>
+    </aside>
+
+    <!-- Center: Graph Canvas -->
+    <section class="panel graph-panel">
+      <div class="graph-header">
+        <h2>🌆 City Graph — Intersection Map</h2>
+        <div class="graph-controls">
+          <button class="icon-btn" id="zoomInBtn" title="Zoom In">+</button>
+          <button class="icon-btn" id="zoomOutBtn" title="Zoom Out">−</button>
+          <button class="icon-btn" id="fitBtn" title="Fit">⊞</button>
+        </div>
+      </div>
+      <div class="canvas-wrapper" id="canvasWrapper">
+        <svg id="graphSvg" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrowHead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="rgba(255,255,255,0.3)" />
+            </marker>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%" filterUnits="userSpaceOnUse">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <filter id="glowStrong" x="-50%" y="-50%" width="200%" height="200%" filterUnits="userSpaceOnUse">
+              <feGaussianBlur stdDeviation="6" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <linearGradient id="edgeLow" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#48bb78" />
+              <stop offset="100%" stop-color="#68d391" />
+            </linearGradient>
+            <linearGradient id="edgeMed" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#f6ad55" />
+              <stop offset="100%" stop-color="#fbd38d" />
+            </linearGradient>
+            <linearGradient id="edgeHigh" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#fc8181" />
+              <stop offset="100%" stop-color="#feb2b2" />
+            </linearGradient>
+            <linearGradient id="pathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#63b3ed" />
+              <stop offset="100%" stop-color="#b794f4" />
+            </linearGradient>
+          </defs>
+          <g id="edgesGroup"></g>
+          <g id="pathGroup"></g>
+          <g id="nodesGroup"></g>
+          <g id="labelsGroup"></g>
+          <g id="pathOverlayGroup"></g>
+        </svg>
+        <div class="canvas-hint" id="canvasHint">Select source & destination, then click <strong>Find Optimal
+            Route</strong></div>
+      </div>
+    </section>
+
+    <!-- Right Panel: Results -->
+    <aside class="panel results-panel">
+      <div class="panel-header">
+        <h2>📊 Route Analysis</h2>
+        <p>Dijkstra's shortest path results</p>
+      </div>
+
+      <div class="results-empty" id="resultsEmpty">
+        <div class="empty-icon">🛣️</div>
+        <p>Run route finder to see<br />path analysis results</p>
+      </div>
+
+      <div class="results-content hidden" id="resultsContent">
+
+        <!-- Before Traffic -->
+        <div class="result-card card-before">
+          <div class="card-badge">BEFORE TRAFFIC</div>
+          <div class="path-display" id="beforePath">—</div>
+          <div class="metric-row">
+            <div class="metric">
+              <div class="metric-label">Base Cost</div>
+              <div class="metric-value" id="beforeCost">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Hops</div>
+              <div class="metric-value" id="beforeHops">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- After Traffic -->
+        <div class="result-card card-after">
+          <div class="card-badge badge-after">AFTER TRAFFIC</div>
+          <div class="path-display" id="afterPath">—</div>
+          <div class="metric-row">
+            <div class="metric">
+              <div class="metric-label">Traffic Cost</div>
+              <div class="metric-value" id="afterCost">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Hops</div>
+              <div class="metric-value" id="afterHops">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Savings -->
+        <div class="savings-card" id="savingsCard">
+          <div class="savings-icon" id="savingsIcon">💰</div>
+          <div class="savings-text">
+            <div class="savings-label" id="savingsLabel">Cost Saved</div>
+            <div class="savings-value" id="savingsValue">—</div>
+          </div>
+          <div class="savings-pct" id="savingsPct">—</div>
+        </div>
+
+        <!-- Path Steps -->
+        <div class="steps-section">
+          <div class="steps-title">🛤️ Optimal Route Steps</div>
+          <div class="steps-list" id="stepsList"></div>
+        </div>
+
+        <!-- Traffic Impact -->
+        <div class="impact-section">
+          <div class="steps-title">🚦 Traffic Edge Status</div>
+          <div class="edge-status-list" id="edgeStatusList"></div>
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Animated path overlay toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="graph.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
